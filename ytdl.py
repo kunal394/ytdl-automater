@@ -17,6 +17,7 @@ mp3 = {
         'verbose': True,
         'fixup': 'detect_or_warn',  # Automatically correct known faults of the file.
         'format': 'bestaudio/best', # choice of quality
+        'ignoreerrors' : True,
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
@@ -33,6 +34,7 @@ mp4 = {
         'verbose': True,
         'fixup': 'detect_or_warn',  # Automatically correct known faults of the file.
         'format': 'bestvideo+bestaudio/bestvideo[ext=mp4]+bestaudio/bestvideo[ext=mkv]+bestaudio/best', # choice of quality
+        'ignoreerrors' : True,
         #'extractaudio' : True,      # only keep the audio
         'videoformat' : "mp4",      # convert to mp4
         'outtmpl': '%(title)s.%(ext)s',     # name the file the title of the video
@@ -43,6 +45,7 @@ mp3_playlist = {
         'verbose': True,
         'fixup': 'detect_or_warn',  # Automatically correct known faults of the file.
         'format': 'bestaudio/best', # choice of quality
+        'ignoreerrors' : True,
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
@@ -58,6 +61,7 @@ mp4_playlist = {
         'verbose': True,
         'fixup': 'detect_or_warn',  # Automatically correct known faults of the file.
         'format': 'bestvideo+bestaudio/bestvideo[ext=mp4]+bestaudio/bestvideo[ext=mkv]+bestaudio/best', # choice of quality
+        'ignoreerrors' : True,
         'videoformat' : "mp4",      # convert to mp4 
         'outtmpl': '%(title)s.%(ext)s',     # name the file the title of the video
         'noplaylist' : False,        # only download single song, not playlist
