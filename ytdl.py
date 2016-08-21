@@ -13,6 +13,22 @@ format: bestaudio/best means first look for file with best audio quality,
 from __future__ import unicode_literals
 import youtube_dl, sys
 
+#correct flac: something is wrong!!!!
+flac = {
+        'verbose': True,
+        'fixup': 'detect_or_warn',  # Automatically correct known faults of the file.
+        'format': 'bestaudio/best', # choice of quality
+        'ignoreerrors' : True,
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'flac'
+            }],
+        'extractaudio' : True,      # only keep the audio
+        'outtmpl': '%(title)s.%(ext)s',     # name the file the title of the video
+        'noplaylist' : True,        # only download single song, not playlist
+        #'proxy': 'http:proxy.iiit.ac.in:8080' #proxy
+    }
+
 mp3 = {
         'verbose': True,
         'fixup': 'detect_or_warn',  # Automatically correct known faults of the file.
@@ -68,14 +84,16 @@ mp4_playlist = {
     }
 
 def down(url, t):
-    if t == 'mp4':
-        options = mp4
+    if t == 'flac':
+        options = flac
     elif t == 'mp3':
         options = mp3
-    elif t == 'mp4p':
-        options = mp4_playlist
     elif t == 'mp3p':
         options = mp3_playlist
+    elif t == 'mp4':
+        options = mp4
+    elif t == 'mp4p':
+        options = mp4_playlist
     ydl = youtube_dl.YoutubeDL(options)
     r = ydl.extract_info(url)
 
