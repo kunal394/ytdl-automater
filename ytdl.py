@@ -11,93 +11,93 @@ format: bestaudio/best means first look for file with best audio quality,
 """
 
 from __future__ import unicode_literals
-import youtube_dl, sys
+import youtube_dl, sys, argparse
+
+common_settings = {
+        'continue': True,
+        'embedthumbnail': True,
+        'fixup': 'detect_or_warn',  # Automatically correct known faults of the file.
+        'ignoreerrors' : True,
+        'outtmpl': '%(title)s.%(ext)s',     # name the file the title of the video
+        #'proxy': 'http:proxy.iiit.ac.in:8080' #proxy
+        'verbose': True
+        }
 
 #correct flac: something is wrong!!!!
 flac = {
-        'verbose': True,
-        'fixup': 'detect_or_warn',  # Automatically correct known faults of the file.
+        'extractaudio' : True,      # only keep the audio
         'format': 'bestaudio/best', # choice of quality
-        'ignoreerrors' : True,
+        'noplaylist' : True,        # only download single song, not playlist
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'flac'
-            }],
-        'extractaudio' : True,      # only keep the audio
-        'outtmpl': '%(title)s.%(ext)s',     # name the file the title of the video
-        'noplaylist' : True,        # only download single song, not playlist
-        #'proxy': 'http:proxy.iiit.ac.in:8080' #proxy
+            }]
     }
 
 mp3 = {
-        'verbose': True,
-        'fixup': 'detect_or_warn',  # Automatically correct known faults of the file.
+        #'audioformat' : "mp3",      # convert to mp3 
+        'extractaudio' : True,      # only keep the audio
         'format': 'bestaudio/best', # choice of quality
-        'ignoreerrors' : True,
+        'noplaylist' : True,        # only download single song, not playlist
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
             'preferredquality': '320',
-            }],
-        'extractaudio' : True,      # only keep the audio
-        #'audioformat' : "mp3",      # convert to mp3 
-        'outtmpl': '%(title)s.%(ext)s',     # name the file the title of the video
-        'noplaylist' : True,        # only download single song, not playlist
-        #'proxy': 'http:proxy.iiit.ac.in:8080' #proxy
-    }
-
-mp4 = {
-        'verbose': True,
-        'fixup': 'detect_or_warn',  # Automatically correct known faults of the file.
-        'format': 'bestvideo+bestaudio/bestvideo[ext=mp4]+bestaudio/bestvideo[ext=mkv]+bestaudio/best', # choice of quality
-        'ignoreerrors' : True,
-        #'extractaudio' : True,      # only keep the audio
-        'videoformat' : "mp4",      # convert to mp4
-        'outtmpl': '%(title)s.%(ext)s',     # name the file the title of the video
-        'noplaylist' : True,        # only download single song, not playlist
+            }]
     }
 
 mp3_playlist = {
-        'verbose': True,
-        'fixup': 'detect_or_warn',  # Automatically correct known faults of the file.
+        #'audioformat' : "mp3",      # convert to mp3 
+        'extractaudio' : True,      # only keep the audio
         'format': 'bestaudio/best', # choice of quality
-        'ignoreerrors' : True,
+        'noplaylist' : False,        # only download single song, not playlist
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
             'preferredquality': '320',
-            }],
-        'extractaudio' : True,      # only keep the audio
-        #'audioformat' : "mp3",      # convert to mp3 
-        'outtmpl': '%(title)s.%(ext)s',     # name the file the title of the video
-        'noplaylist' : False,        # only download single song, not playlist
+            }]
+    }
+
+mp4 = {
+        #'extractaudio' : True,      # only keep the audio
+        'format': 'bestvideo+bestaudio/bestvideo[ext=mp4]+bestaudio/bestvideo[ext=mkv]+bestaudio/best', # choice of quality
+        'noplaylist' : True,        # only download single song, not playlist
+        'videoformat' : "mp4"      # convert to mp4
     }
 
 mp4_playlist = {
-        'verbose': True,
-        'fixup': 'detect_or_warn',  # Automatically correct known faults of the file.
         'format': 'bestvideo+bestaudio/bestvideo[ext=mp4]+bestaudio/bestvideo[ext=mkv]+bestaudio/best', # choice of quality
-        'ignoreerrors' : True,
-        'videoformat' : "mp4",      # convert to mp4 
-        'outtmpl': '%(title)s.%(ext)s',     # name the file the title of the video
         'noplaylist' : False,        # only download single song, not playlist
+        'videoformat' : "mp4"      # convert to mp4 
     }
 
-def down(url, t):
-    if t == 'flac':
-        options = flac
-    elif t == 'mp3':
-        options = mp3
-    elif t == 'mp3p':
-        options = mp3_playlist
-    elif t == 'mp4':
-        options = mp4
-    elif t == 'mp4p':
-        options = mp4_playlist
+def download(args):
+    options = {}
+    if args['type'].endswith('p'):
+        try:
+            options.update({'playliststart': int(args['play_start'])})
+        except:
+            pass
+        try:
+            options.update({'playlistend': int(args['play_end'])})
+        except:
+            pass
+    if args['type'] == 'flac':
+        options.update(flac)
+    elif args['type'] == 'mp3':
+        options.update(mp3)
+    elif args['type'] == 'mp3p':
+        options.update(mp3_playlist)
+    elif args['type'] == 'mp4':
+        options.update(mp4)
+    elif args['type'] == 'mp4p':
+        options.update(mp4_playlist)
+
+    options.update(common_settings)
     ydl = youtube_dl.YoutubeDL(options)
-    r = ydl.extract_info(url)
+    r = ydl.extract_info(args['url'])
 
 if __name__ == "__main__":
-    url = sys.argv[1]
-    t = sys.argv[2]
-    down(url, t)
+    arg_names = ['command', 'type', 'url', 'play_start', 'play_end']
+    args = dict(zip(arg_names, sys.argv))
+    download(args)
