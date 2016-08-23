@@ -1,78 +1,98 @@
 #!/usr/bin/env python
 
-
-"""
-interpretations of the options, some of them might be wrong:
-
-format: bestaudio/best means first look for file with best audio quality,
-        if not found then select best quality format represented by single 
-        file with video and audio
-
-"""
-
 from __future__ import unicode_literals
 import youtube_dl, sys, argparse
 
 common_settings = {
         'continue': True,
-        'embedthumbnail': True,
         'fixup': 'detect_or_warn',  # Automatically correct known faults of the file.
         'ignoreerrors' : True,
         'outtmpl': '%(title)s.%(ext)s',     # name the file the title of the video
-        #'proxy': 'http:proxy.iiit.ac.in:8080' #proxy
-        'verbose': True
+        'verbose': True,
+        'writethumbnail': True,
         }
 
-#correct flac: something is wrong!!!!
-flac = {
+def contruct_flac():
+    #TODO:debug flac!! something's wrong!!!!
+    flac = {
         'extractaudio' : True,      # only keep the audio
         'format': 'bestaudio/best', # choice of quality
         'noplaylist' : True,        # only download single song, not playlist
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'flac'
-            }]
-    }
+        }
+    postprocessors = [{
+        'key': 'FFmpegExtractAudio',
+        'preferredcodec': 'flac',
+        }]
+    return flac, postprocessors
 
-mp3 = {
+def contruct_mp3():
+    mp3 = {
         #'audioformat' : "mp3",      # convert to mp3 
         'extractaudio' : True,      # only keep the audio
         'format': 'bestaudio/best', # choice of quality
         'noplaylist' : True,        # only download single song, not playlist
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '320',
-            }]
-    }
+        }
+    postprocessors = [{
+        'key': 'FFmpegExtractAudio',
+        'preferredcodec': 'mp3',
+        'preferredquality': '320',
+        }]
+    return mp3, postprocessors
 
-mp3_playlist = {
+def contruct_mp3_playlist():
+    mp3_playlist = {
         #'audioformat' : "mp3",      # convert to mp3 
         'extractaudio' : True,      # only keep the audio
         'format': 'bestaudio/best', # choice of quality
         'noplaylist' : False,        # only download single song, not playlist
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '320',
-            }]
-    }
+        }
+    postprocessors = [{
+        'key': 'FFmpegExtractAudio',
+        'preferredcodec': 'mp3',
+        'preferredquality': '320',
+        }]
+    return mp3_playlist, postprocessors
 
-mp4 = {
+def contruct_mp4():
+    mp4 = {
         #'extractaudio' : True,      # only keep the audio
         'format': 'bestvideo+bestaudio/bestvideo[ext=mp4]+bestaudio/bestvideo[ext=mkv]+bestaudio/best', # choice of quality
         'noplaylist' : True,        # only download single song, not playlist
-        'videoformat' : "mp4"      # convert to mp4
-    }
+        'videoformat' : "mp4",      # convert to mp4
+        }
+    return mp4
 
-mp4_playlist = {
+def contruct_mp4_playlist():
+    mp4_playlist = {
         'format': 'bestvideo+bestaudio/bestvideo[ext=mp4]+bestaudio/bestvideo[ext=mkv]+bestaudio/best', # choice of quality
         'noplaylist' : False,        # only download single song, not playlist
-        'videoformat' : "mp4"      # convert to mp4 
-    }
+        'videoformat' : "mp4",     # convert to mp4 
+        }
+    return mp4_playlist
 
 def download(args):
-    options = {}
+    global common_settings
+    postprocessors = []
+
+    if args['type'] == 'flac':
+        options, p = contruct_flac()
+    elif args['type'] == 'mp3':
+        options, p = contruct_mp3()
+    elif args['type'] == 'mp3p':
+        options, p = contruct_mp3_playlist()
+    elif args['type'] == 'mp4':
+        options = contruct_mp4()
+        p = []
+    elif args['type'] == 'mp4p':
+        options = contruct_mp4_playlist()
+        p = []
+
+    postprocessors.extend(p)
+    postprocessors.append({
+            'key': 'EmbedThumbnail',
+            })
+    options.update({'postprocessors' : postprocessors})
+
     if args['type'].endswith('p'):
         try:
             options.update({'playliststart': int(args['play_start'])})
@@ -82,18 +102,11 @@ def download(args):
             options.update({'playlistend': int(args['play_end'])})
         except:
             pass
-    if args['type'] == 'flac':
-        options.update(flac)
-    elif args['type'] == 'mp3':
-        options.update(mp3)
-    elif args['type'] == 'mp3p':
-        options.update(mp3_playlist)
-    elif args['type'] == 'mp4':
-        options.update(mp4)
-    elif args['type'] == 'mp4p':
-        options.update(mp4_playlist)
 
     options.update(common_settings)
+
+
+    print options
     ydl = youtube_dl.YoutubeDL(options)
     r = ydl.extract_info(args['url'])
 
