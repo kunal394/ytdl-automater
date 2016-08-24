@@ -1,16 +1,7 @@
 #!/usr/bin/env python
 
 from __future__ import unicode_literals
-import youtube_dl, sys, argparse
-
-common_settings = {
-        'continue': True,
-        'fixup': 'detect_or_warn',  # Automatically correct known faults of the file.
-        'ignoreerrors' : True,
-        'outtmpl': '%(title)s.%(ext)s',     # name the file the title of the video
-        'verbose': True,
-        'writethumbnail': True,
-        }
+import youtube_dl, sys, argparse, os
 
 def contruct_flac():
     #TODO:debug flac!! something's wrong!!!!
@@ -70,8 +61,28 @@ def contruct_mp4_playlist():
         }
     return mp4_playlist
 
+def check_if_exists(options, args):
+    print "**************\nChecking if file already exists\n**************"
+    ydl = youtube_dl.YoutubeDL(options)
+    r = ydl.extract_info(args['url'], download = False)
+    song_name = r['title'].strip() + '.' + args['type']
+    print song_name
+    if os.path.exists('./' + song_name):
+        print '**************\nFile already downloaded\n**************'
+        return (ydl, 0)
+    else:
+        print "**************\nFile not found. Downloading...\n**************"
+        return (ydl, 1)
+
 def download(args):
-    global common_settings
+    common_settings = {
+            'continue': True,
+            'fixup': 'detect_or_warn',  # Automatically correct known faults of the file.
+            'ignoreerrors' : True,
+            'outtmpl': '%(title)s.%(ext)s',     # name the file the title of the video
+            'verbose': True,
+            'writethumbnail': True,
+            }
     postprocessors = []
 
     if args['type'] == 'flac':
@@ -106,9 +117,14 @@ def download(args):
     options.update(common_settings)
 
 
-    print options
-    ydl = youtube_dl.YoutubeDL(options)
-    r = ydl.extract_info(args['url'])
+    #print options
+    if not args['type'].endswith('p'):
+        ydl, check = check_if_exists(options, args)
+        if check == 1:
+            r = ydl.extract_info(args['url'])
+    else:
+        ydl = youtube_dl.YoutubeDL(options)
+        r = ydl.extract_info(args['url'])
 
 if __name__ == "__main__":
     arg_names = ['command', 'type', 'url', 'play_start', 'play_end']
