@@ -13,8 +13,13 @@ def contruct_flac():
     postprocessors = [{
         'key': 'FFmpegExtractAudio',
         'preferredcodec': 'flac',
+        },
+        {
+            'key': 'EmbedThumbnail',
         }]
-    return flac, postprocessors
+
+    flac.update({'postprocessors': postprocessors, 'writethumbnail': True})
+    return flac
 
 def contruct_mp3():
     mp3 = {
@@ -27,8 +32,13 @@ def contruct_mp3():
         'key': 'FFmpegExtractAudio',
         'preferredcodec': 'mp3',
         'preferredquality': '320',
+        },
+        {
+            'key': 'EmbedThumbnail',
         }]
-    return mp3, postprocessors
+        
+    mp3.update({'postprocessors': postprocessors, 'writethumbnail': True})
+    return mp3
 
 def contruct_mp3_playlist():
     mp3_playlist = {
@@ -41,8 +51,13 @@ def contruct_mp3_playlist():
         'key': 'FFmpegExtractAudio',
         'preferredcodec': 'mp3',
         'preferredquality': '320',
+        },
+        {
+            'key': 'EmbedThumbnail',
         }]
-    return mp3_playlist, postprocessors
+
+    mp3_playlist.update({'postprocessors': postprocessors, 'writethumbnail': True})
+    return mp3_playlist
 
 def contruct_mp4():
     mp4 = {
@@ -81,28 +96,18 @@ def download(args):
             'ignoreerrors' : True,
             'outtmpl': '%(title)s.%(ext)s',     # name the file the title of the video
             'verbose': True,
-            'writethumbnail': True,
             }
-    postprocessors = []
 
     if args['type'] == 'flac':
-        options, p = contruct_flac()
+        options = contruct_flac()
     elif args['type'] == 'mp3':
-        options, p = contruct_mp3()
+        options = contruct_mp3()
     elif args['type'] == 'mp3p':
-        options, p = contruct_mp3_playlist()
+        options = contruct_mp3_playlist()
     elif args['type'] == 'mp4':
         options = contruct_mp4()
-        p = []
     elif args['type'] == 'mp4p':
         options = contruct_mp4_playlist()
-        p = []
-
-    postprocessors.extend(p)
-    postprocessors.append({
-            'key': 'EmbedThumbnail',
-            })
-    options.update({'postprocessors' : postprocessors})
 
     if args['type'].endswith('p'):
         try:
