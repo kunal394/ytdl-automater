@@ -79,14 +79,18 @@ def contruct_mp4_playlist():
 def check_if_exists(options, args):
     print "**************\nChecking if file already exists\n**************"
     ydl = youtube_dl.YoutubeDL(options)
-    r = ydl.extract_info(args['url'], download = False)
-    song_name = r['title'].strip() + '.' + args['type']
-    print song_name
-    if os.path.exists('./' + song_name):
+    try:
+      r = ydl.extract_info(args['url'], download = False)
+      song_name = r['title'].strip() + '.' + args['type']
+      print song_name
+      if os.path.exists('./' + song_name):
         print '**************\nFile already downloaded\n**************'
         return (ydl, 0)
-    else:
+      else:
         print "**************\nFile not found. Downloading...\n**************"
+        return (ydl, 1)
+    except Exception as e:
+        print "Found some exception: " + unicode(e) + ". Skipping the check!"
         return (ydl, 1)
 
 def download(args):
